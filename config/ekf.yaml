@@ -1,0 +1,58 @@
+# =============================================================================
+# EKF Configuration for mybot rover
+# Fuses wheel odometry (odom0) and IMU (imu0) using robot_localization
+# =============================================================================
+#
+# The 15-element config arrays map to:
+# [x, y, z,
+#  roll, pitch, yaw,
+#  x_dot, y_dot, z_dot,
+#  roll_dot, pitch_dot, yaw_dot,
+#  x_ddot, y_ddot, z_ddot]
+#
+# =============================================================================
+
+ekf_filter_node:
+  ros__parameters:
+    # ----- General EKF Settings -----
+    frequency: 30.0
+    two_d_mode: true
+    publish_tf: true
+
+    # ----- Frame Configuration -----
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_link
+    world_frame: odom
+
+    # =================================================================
+    # odom0: Wheel Odometry
+    # Trust ONLY: X velocity, Y velocity, Yaw velocity
+    # Wheel encoders give us reliable velocity estimates,
+    # but position drifts over time due to slipping in dirt.
+    # =================================================================
+    odom0: /odom
+    odom0_config: [false, false, false,
+                   false, false, false,
+                   true,  true,  false,
+                   false, false, true,
+                   false, false, false]
+
+    # =================================================================
+    # imu0: IMU Sensor
+    # Trust ONLY: Yaw orientation, Yaw rotational velocity
+    # The IMU gives us a reliable absolute heading (yaw) and
+    # turn rate. We ignore roll/pitch since this is a ground rover
+    # operating in 2D mode.
+    #
+    # NOTE: The IMU is mounted backwards (180° around Z-axis).
+    # This is handled by the static_transform_publisher in the
+    # launch file, which publishes base_link -> imu_link with
+    # a 180° yaw rotation.
+    # =================================================================
+    imu0: /imu/data
+    imu0_config: [false, false, false,
+                  false, false, true,
+                  false, false, false,
+                  false, false, true,
+                  false, false, false]
